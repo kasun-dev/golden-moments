@@ -14,16 +14,221 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      event_members: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_members_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          contact_name: string | null
+          couple_names: string | null
+          created_at: string
+          estimated_guests: number | null
+          event_dates: Json
+          id: string
+          locations: Json
+          owner_id: string | null
+          rsvp_deadline: string | null
+          slug: string
+          status: Database["public"]["Enums"]["event_status"]
+          template_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          contact_name?: string | null
+          couple_names?: string | null
+          created_at?: string
+          estimated_guests?: number | null
+          event_dates?: Json
+          id?: string
+          locations?: Json
+          owner_id?: string | null
+          rsvp_deadline?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["event_status"]
+          template_id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          contact_name?: string | null
+          couple_names?: string | null
+          created_at?: string
+          estimated_guests?: number | null
+          event_dates?: Json
+          id?: string
+          locations?: Json
+          owner_id?: string | null
+          rsvp_deadline?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["event_status"]
+          template_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      guests: {
+        Row: {
+          access_token: string
+          created_at: string
+          dietary_requirements: string | null
+          event_id: string
+          first_name: string
+          id: string
+          invitation_sent: boolean
+          is_attending: boolean | null
+          phone: string | null
+          rsvp_status: Database["public"]["Enums"]["rsvp_status"]
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          dietary_requirements?: string | null
+          event_id: string
+          first_name: string
+          id?: string
+          invitation_sent?: boolean
+          is_attending?: boolean | null
+          phone?: string | null
+          rsvp_status?: Database["public"]["Enums"]["rsvp_status"]
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          dietary_requirements?: string | null
+          event_id?: string
+          first_name?: string
+          id?: string
+          invitation_sent?: boolean
+          is_attending?: boolean | null
+          phone?: string | null
+          rsvp_status?: Database["public"]["Enums"]["rsvp_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sub_guests: {
+        Row: {
+          created_at: string
+          dietary_requirements: string | null
+          full_name: string
+          id: string
+          is_attending: boolean | null
+          parent_guest_id: string
+        }
+        Insert: {
+          created_at?: string
+          dietary_requirements?: string | null
+          full_name: string
+          id?: string
+          is_attending?: boolean | null
+          parent_guest_id: string
+        }
+        Update: {
+          created_at?: string
+          dietary_requirements?: string | null
+          full_name?: string
+          id?: string
+          is_attending?: boolean | null
+          parent_guest_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_guests_parent_guest_id_fkey"
+            columns: ["parent_guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_event: { Args: { _event_id: string }; Returns: boolean }
+      get_invitation: { Args: { _slug: string; _token: string }; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      submit_household_rsvp: {
+        Args: {
+          _dietary: string
+          _primary_attending: boolean
+          _slug: string
+          _sub_guests: Json
+          _token: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "couple"
+      event_status: "lead" | "onboarding" | "active" | "closed"
+      rsvp_status: "pending" | "confirmed" | "declined"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +355,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "couple"],
+      event_status: ["lead", "onboarding", "active", "closed"],
+      rsvp_status: ["pending", "confirmed", "declined"],
+    },
   },
 } as const

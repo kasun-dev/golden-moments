@@ -13,6 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as VSlugRouteImport } from './routes/v.$slug'
+import { Route as AuthenticatedPortalEventIdRouteImport } from './routes/_authenticated/portal.$eventId'
+import { Route as AuthenticatedDashboardEventsIdRouteImport } from './routes/_authenticated/dashboard.events.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -33,37 +36,83 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const VSlugRoute = VSlugRouteImport.update({
+  id: '/v/$slug',
+  path: '/v/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedPortalEventIdRoute =
+  AuthenticatedPortalEventIdRouteImport.update({
+    id: '/portal/$eventId',
+    path: '/portal/$eventId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardEventsIdRoute =
+  AuthenticatedDashboardEventsIdRouteImport.update({
+    id: '/events/$id',
+    path: '/events/$id',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/v/$slug': typeof VSlugRoute
+  '/portal/$eventId': typeof AuthenticatedPortalEventIdRoute
+  '/dashboard/events/$id': typeof AuthenticatedDashboardEventsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/v/$slug': typeof VSlugRoute
+  '/portal/$eventId': typeof AuthenticatedPortalEventIdRoute
+  '/dashboard/events/$id': typeof AuthenticatedDashboardEventsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/v/$slug': typeof VSlugRoute
+  '/_authenticated/portal/$eventId': typeof AuthenticatedPortalEventIdRoute
+  '/_authenticated/dashboard/events/$id': typeof AuthenticatedDashboardEventsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/v/$slug'
+    | '/portal/$eventId'
+    | '/dashboard/events/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/v/$slug'
+    | '/portal/$eventId'
+    | '/dashboard/events/$id'
   id:
-    '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/dashboard'
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/dashboard'
+    | '/v/$slug'
+    | '/_authenticated/portal/$eventId'
+    | '/_authenticated/dashboard/events/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  VSlugRoute: typeof VSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -96,15 +145,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/v/$slug': {
+      id: '/v/$slug'
+      path: '/v/$slug'
+      fullPath: '/v/$slug'
+      preLoaderRoute: typeof VSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/portal/$eventId': {
+      id: '/_authenticated/portal/$eventId'
+      path: '/portal/$eventId'
+      fullPath: '/portal/$eventId'
+      preLoaderRoute: typeof AuthenticatedPortalEventIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/events/$id': {
+      id: '/_authenticated/dashboard/events/$id'
+      path: '/events/$id'
+      fullPath: '/dashboard/events/$id'
+      preLoaderRoute: typeof AuthenticatedDashboardEventsIdRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
   }
 }
 
+interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardEventsIdRoute: typeof AuthenticatedDashboardEventsIdRoute
+}
+
+const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
+  {
+    AuthenticatedDashboardEventsIdRoute: AuthenticatedDashboardEventsIdRoute,
+  }
+
+const AuthenticatedDashboardRouteWithChildren =
+  AuthenticatedDashboardRoute._addFileChildren(
+    AuthenticatedDashboardRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRouteWithChildren
+  AuthenticatedPortalEventIdRoute: typeof AuthenticatedPortalEventIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRouteWithChildren,
+  AuthenticatedPortalEventIdRoute: AuthenticatedPortalEventIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -114,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  VSlugRoute: VSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
